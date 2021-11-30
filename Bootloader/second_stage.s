@@ -1,13 +1,64 @@
 [org 0x7E00]
 use16
-setup_vesa:
-		
-	
-	;sti
 
-	xor ax, ax
-	mov es, ax
-	mov ah, 0x4F
+xor ax, ax
+mov es, ax
+
+memmap_entries	equ 0x8500
+get_mem_map:
+	mov di, 0x8504
+	xor ebx, ebx
+	xor bp, bp
+	
+	mov edx, 'PAMS'
+	mov eax, 0xE820
+	mov [es:di + 20], dword 1
+	mov ecx, 24
+	int 0x15
+	jc .error
+	
+	cmp eax, 'PAMS'
+	jne .error
+	test ebx, ebx
+	jz .error
+	jmp .start
+.next_entry:
+	mov edx, 'PAMS'
+	mov ecx, 24
+	mov eax, 0xE820
+	int 0x15
+.start:
+	jcxz .skip
+	mov ecx, [es:di + 8]
+	or ecx, [es:di + 12]
+	jz .skip
+.good:
+	inc bp
+	add di, 24
+.skip:
+	test ebx, ebx
+	jz .done
+	jmp .next_entry
+.error:
+	mov ah, 0x0e
+	mov al, 'F'
+	int 0x10
+
+	cli
+	hlt
+.done:
+	mov [memmap_entries], bp
+	clc
+
+
+jmp setup_vesa
+
+%include "Bootloader/gdt.asm"
+
+setup_vesa:
+	;xor ax, ax
+	;mov es, ax
+	mov ax, 0x4F00
 	mov di, vbe_info_block
 	int 0x10
 
@@ -19,8 +70,7 @@ setup_vesa:
 	mov ax, word[vbe_info_block.video_modes+2]
 	mov [t_segment], ax
 
-	;mov ax, [t_segment]
-	mov fs, ax
+	mov fs, [t_segment]
 	mov si, [offset]
 
 	jmp find_mode
@@ -70,7 +120,7 @@ find_mode:
 	cmp ax, 0x4F
 	jne err
 
-	jmp success
+	jmp enter_pm_mode
 
 end:
 	mov ax, 0x0E4E
@@ -79,8 +129,8 @@ end:
 	cli
 	hlt
 next_mode:
-	mov ax, [t_segment]
-	mov fs, ax
+	;mov ax, [t_segment]
+	mov fs, [t_segment]
 	mov si, [offset]
 	jmp find_mode
 err:
@@ -91,18 +141,44 @@ err:
 	cli
 	hlt
 
-success:
-    cli
-    hlt
+enter_pm_mode:
+	in al, 0x92
+	or al, 0x02
+	out 0x92, al
+
+	cli
+	lgdt[gdt_desc]
+	mov eax, cr0
+	or eax, 0x01
+	mov cr0, eax
+	
+	jmp codeseg:init_pm
+
+use32
+init_pm:
+	mov ax, dataseg
+	mov ds, ax
+	mov ss, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+
+	mov esp, 0x90000
+	mov esi, mode_info_block
+	mov edi, 0x4000
+	mov ecx, 64
+	rep movsd
+
+	jmp codeseg:0x2000
     
-width:		dw 1024
-height:		dw 768
+width:		dw 800
+height:		dw 600
 bpp:		db 32
 t_segment:	dw 0x0
 offset:		dw 0x0
 mode:		dw 0x0
 
-;times 512 - ($ - $$) db 0
+times 512 - ($ - $$) db 0
 
 vbe_info_block:
 	.vbe_signature:			db 'VBE2'
