@@ -7,7 +7,7 @@ BIN_FILES = $(FILES:%=bin/%.bin)
 .PHONY: clean
 
 run: $(FILES) compile
-	dd if=/dev/zero of=OS.bin bs=512 count=14
+	dd if=/dev/zero of=OS.bin bs=512 count=20
 	cat $(BIN_FILES) test_font.bin bin/kernel.bin > temp.bin
 	dd if=temp.bin of=OS.bin conv=notrunc
 	rm -rf temp.bin

@@ -32,9 +32,9 @@ __attribute__((section("kernel_entry"))) void kernel_main(void)
 	 * From 0x1000 to the end of the kernel(0x2800), reserve.
 	 * Everything beyond 0x2800 is free grabs.
 	 * */
-	deinit_region(0x1000, 0x2800);
+	deinit_region(0x1000, (uint32)&end);
 	deinit_region(0x15000, max_blocks / BLOCKS_PER_BYTE);
-	print_mem_info();
+	Print((uint8 *)"Memory Initialized\n");
 
 	while(1);
 }
@@ -92,4 +92,6 @@ void print_mem_info()
 	PrintHex((uint32)used_blocks);
 	Print((uint8 *)", Available: ");
 	PrintHex(max_blocks-used_blocks);
+	Print((uint8 *)", Allocated: ");
+	PrintHex(total_allocated);
 }

@@ -9,7 +9,7 @@ typedef unsigned int		uint32;
 typedef int			int32;
 typedef unsigned long long	uint64;
 typedef long long		int64;
-typedef uint32			size_t;
+typedef uint64			size_t;
 
 /*	INFO STRUCTS	*/
 // VesaInfoBlock:
@@ -59,6 +59,25 @@ typedef struct TerminalCursor
 	uint16	cursor_y;
 } Terminal_Cursor;
 
+// MemProcess
+// 	All processes the kernel is handling.
+// 	Keep track of overall memory between each allocation.
+static uint32 curr_pID = 0;
+typedef struct MemProcess
+{
+	uint8	occupied;
+	uint32	pID;
+	uint32	address;
+	size_t	allocation_size;
+	size_t	allocation_used;
+} MProcess;
+
+/*
+ * Allow only 25 processes at once.
+ * Once there is 25 processes going, you'll have to end another process to start a new one.
+ * */
+static MProcess all_processes[25];
+
 static Terminal_Cursor tc = {
 	.cursor_x = 0, 
 	.cursor_y = 0
@@ -82,6 +101,17 @@ void *memset(void *buf, uint8 byte, uint32 length)
 	for(uint32 i = 0; i < length; i++)
 		val[i] = byte;
 	return buf;
+}
+
+uint8 inb(uint16 port)
+{
+	uint8 rv;
+	__asm__ __volatile__ ("inb %1, %0" : "=a"(rv) : "dN"(port));
+	return rv;
+}
+void outb(uint16 port, uint8 data)
+{
+	__asm__ __volatile__ ("outb %1, %0" : : "dN"(port), "a"(data));
 }
 
 #endif
