@@ -3,15 +3,18 @@ FILES = boot second_stage
 BIN_FILES = $(FILES:%=bin/%.bin)
 
 .PHONY: run
+.PHONY: build
 .PHONY: compile
 .PHONY: clean
 
-run: $(FILES) compile
+run: $(FILES) compile build
+	qemu-system-i386 -drive format=raw,file=OS.bin,if=ide,index=0,media=disk
+
+build: $(FILES) compile
 	dd if=/dev/zero of=OS.bin bs=512 count=20
 	cat $(BIN_FILES) test_font.bin bin/kernel.bin > temp.bin
 	dd if=temp.bin of=OS.bin conv=notrunc
 	rm -rf temp.bin
-	qemu-system-i386 -drive format=raw,file=OS.bin,if=ide,index=0,media=disk
 
 $(FILES):
 	nasm -f bin -o bin/$@.bin Bootloader/$@.s

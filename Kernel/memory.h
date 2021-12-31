@@ -12,6 +12,7 @@ static uint32 max_blocks	= 0;
 static uint32 *memory_map	= 0;
 static uint32 total_allocated 	= 0;
 
+#define get_total_mem()		max_blocks - used_blocks
 
 /*	Functions/Macros to manupilate memory_map	*/
 void set(uint32 bit)

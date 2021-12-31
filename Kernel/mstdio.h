@@ -104,7 +104,7 @@ static const _scancodes _vals[] = {
 };
 
 
-void PutC(uint8 c)
+void PutC(uint8 c, uint32 color1, uint32 color2)
 {
 	uint8 *val = (uint8 *)(FONT + ((c * 16) - 16));
 	uint32 *fb = (uint32 *)FB;
@@ -115,7 +115,7 @@ void PutC(uint8 c)
 	{
 		for(int8 b = 7; b >= 0; b--)
 		{
-			*fb = (val[i] & (1 << b)) ? WHITE : BLACK;
+			*fb = (val[i] & (1 << b)) ? color1 : color2;
 			fb++;
 		}
 		fb += (WIDTH - 8);
@@ -124,7 +124,7 @@ void PutC(uint8 c)
 	tc.cursor_x++;
 }
 
-void Print(uint8 *str)
+void Print(uint8 *str, uint32 fg, uint32 bg)
 {
 	while(*str != 0)
 	{
@@ -145,12 +145,19 @@ void Print(uint8 *str)
 			}
 			default:
 			{
-				PutC(*str);
+				PutC(*str, fg, bg);
 				str++;
 				break;
 			}
 		}
 	}
+}
+
+void Err(uint8 *str)
+{
+	Print(str, MakeColor(255, 0, 0), BLACK);
+
+	__asm("hlt");
 }
 
 void PrintHex(uint32 number)
@@ -159,7 +166,7 @@ void PrintHex(uint32 number)
 	if(number <= 0)
 	{
 		uint8 *val = (uint8 *)"0x0";
-		Print((uint8 *)val);
+		Print((uint8 *)val, WHITE, BLACK);
 		return;
 	}
 
@@ -185,7 +192,7 @@ void PrintHex(uint32 number)
 		hex[j] = hex[i];
 		hex[i] = temp;
 	}
-	Print((uint8 *)hex);
+	Print((uint8 *)hex, WHITE, BLACK);
 
 }
 

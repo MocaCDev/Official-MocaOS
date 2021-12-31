@@ -84,11 +84,12 @@ static Terminal_Cursor tc = {
 };
 Vesa_Info_Block *VIB = (Vesa_Info_Block*)0x4000;
 
-#define FB	VIB->framebuffer			 // Vesa framebuffer memory address used to place pixels
-#define FONT	0x1000					 // Custom OS font memory location
-#define WIDTH	800					 // Width of terminal
-#define HEIGHT	600					 // Height of terminal
+#define FB	VIB->framebuffer			 				// Vesa framebuffer memory address used to place pixels
+#define FONT	0x1000					 				// Custom OS font memory location
+#define WIDTH	800					 					// Width of terminal
+#define HEIGHT	600					 					// Height of terminal
 #define MakeColor(R, G, B) (uint32)(R*65536 + G*256 + B	)// Equation to get RGB hex value
+#define resize(size)	size % 2						 // Get remainder value					 
 
 /*	GENERAL COLORS	*/
 #define	WHITE	MakeColor(255, 255, 255)

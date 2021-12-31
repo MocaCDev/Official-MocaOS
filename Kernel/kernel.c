@@ -1,5 +1,6 @@
 #include "mstdio.h"
 #include "memory.h"
+#include "heap.h"
 
 typedef struct Smap
 {
@@ -10,6 +11,7 @@ typedef struct Smap
 } __attribute__((packed)) _Smap;
 
 void print_mem_info(void);
+#define MEMADDR	0x15000
 
 __attribute__((section("kernel_entry"))) void kernel_main(void)
 {
@@ -18,7 +20,7 @@ __attribute__((section("kernel_entry"))) void kernel_main(void)
 	smap += entries - 1;
 	uint32 total = smap->base + smap->length - 1;
 
-	init_mem(0x15000, total);
+	init_mem(MEMADDR, total);
 
 	smap = (_Smap *)0x8504;
 	for(uint32 i = 0; i < entries; i++)
@@ -33,8 +35,9 @@ __attribute__((section("kernel_entry"))) void kernel_main(void)
 	 * Everything beyond 0x2800 is free grabs.
 	 * */
 	deinit_region(0x1000, (uint32)&end);
-	deinit_region(0x15000, max_blocks / BLOCKS_PER_BYTE);
-	Print((uint8 *)"Memory Initialized\n");
+	deinit_region(MEMADDR, max_blocks / BLOCKS_PER_BYTE);
+
+	init_heap_bitmap(normal);
 
 	while(1);
 }
@@ -46,52 +49,54 @@ void print_mem_info()
 
 	Print((uint8 *)
 		"TYPE\t\tREGION\tBASE (LENGTH)\n"
-		"=========   ======\t=============\n"
-	     );
+		"=========   ======\t=============\n",
+	    WHITE, BLACK);
 
 	for(uint32 i = 0; i < entries; i++)
 	{
 		switch(smap->type)
 		{
 			case 1:
-				Print((uint8 *)"(AVAILABLE) ");
+				Print((uint8 *)"(AVAILABLE) ", WHITE, BLACK);
 				break;
 			case 2:
-				Print((uint8 *)"(RESERVED)  ");
+				Print((uint8 *)"(RESERVED)  ", WHITE, BLACK);
 				break;
 			case 3:
-				Print((uint8 *)"(ACPI Reclaimed) ");
+				Print((uint8 *)"(ACPI Reclaimed) ", WHITE, BLACK);
 				break;
 			case 4:
-				Print((uint8 *)"(ACPI NVS Memory) ");
+				Print((uint8 *)"(ACPI NVS Memory) ", WHITE, BLACK);
 				break;
 			default:
-				Print((uint8 *)"(RESERVED)  ");
+				Print((uint8 *)"(RESERVED)  ", WHITE, BLACK);
 				break;
 		}
 
 		PrintHex(i);
 		for(uint8 i = 0; i < 7; i++)
-			PutC(' ');
+			PutC(' ', WHITE, BLACK);
 
 		PrintHex(smap->base);
 
-		Print((uint8 *)" (");
+		Print((uint8 *)" (", WHITE, BLACK);
 		PrintHex(smap->length);
-		Print((uint8 *)")");
+		Print((uint8 *)")", WHITE, BLACK);
 
-		Print((uint8 *)"\n");
+		Print((uint8 *)"\n", WHITE, BLACK);
 
 		smap++;
 	}
 
 	smap--;
-	Print((uint8 *)"Total: ");
+	Print((uint8 *)"Total: ", WHITE, BLACK);
 	PrintHex(smap->base + smap->length - 1);
-	Print((uint8 *)", Used: ");
+	Print((uint8 *)", 4kb blocks: ", WHITE, BLACK);
+	PrintHex((uint32)max_blocks);
+	Print((uint8 *)", Used: ", WHITE, BLACK);
 	PrintHex((uint32)used_blocks);
-	Print((uint8 *)", Available: ");
+	Print((uint8 *)", Available: ", WHITE, BLACK);
 	PrintHex(max_blocks-used_blocks);
-	Print((uint8 *)", Allocated: ");
+	Print((uint8 *)", Allocated: ", WHITE, BLACK);
 	PrintHex(total_allocated);
 }
