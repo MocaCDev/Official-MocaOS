@@ -86,8 +86,8 @@ Vesa_Info_Block *VIB = (Vesa_Info_Block*)0x4000;
 
 #define FB	VIB->framebuffer			 				// Vesa framebuffer memory address used to place pixels
 #define FONT	0x1000					 				// Custom OS font memory location
-#define WIDTH	800					 					// Width of terminal
-#define HEIGHT	600					 					// Height of terminal
+#define WIDTH	1024					 					// Width of terminal
+#define HEIGHT	768					 					// Height of terminal
 #define MakeColor(R, G, B) (uint32)(R*65536 + G*256 + B	)// Equation to get RGB hex value
 #define resize(size)	size % 2						 // Get remainder value					 
 
@@ -113,6 +113,36 @@ uint8 inb(uint16 port)
 void outb(uint16 port, uint8 data)
 {
 	__asm__ __volatile__ ("outb %1, %0" : : "dN"(port), "a"(data));
+}
+
+void update_screen()
+{
+	uint32 *ss, *ss2;
+
+	if(tc.cursor_y >= 40)
+	{
+		ss = (uint32 *) FB;
+		ss2 = ss + (1024 * 16);
+
+		for(uint32 p = 0; p < 0xBA000; p++)
+			*ss++ = *ss2++;
+		for(uint32 p = 0; p < 0x6000; p++)
+			*ss++ = BLACK;
+		tc.cursor_x = 0;
+		tc.cursor_y--;
+		return;
+	}
+}
+
+void clear_screen()
+{
+	uint32 *fb = (uint32 *) FB;
+
+	for(uint32 i = 0; i < WIDTH * HEIGHT; i++)
+		fb[i] = BLACK;
+
+	tc.cursor_x = 0;
+	tc.cursor_y = 0;
 }
 
 #endif

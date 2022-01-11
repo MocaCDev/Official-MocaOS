@@ -171,8 +171,8 @@ init_pm:
 
 	jmp codeseg:0x2000
     
-width:		dw 800
-height:		dw 600
+width:		dw 1024
+height:		dw 768
 bpp:		db 32
 t_segment:	dw 0x0
 offset:		dw 0x0

@@ -135,6 +135,7 @@ void Print(uint8 *str, uint32 fg, uint32 bg)
 				tc.cursor_y++;
 				tc.cursor_x = 0;
 				str++;
+				update_screen();
 				break;
 			}
 			case '\t':
@@ -209,6 +210,20 @@ uint8 get_key()
 	}
 
 	__asm__ __volatile__("inb $0x60, %%al" : "=a"(scancode));
+
+	
+	if(scancode == 0x1C)
+		return 0x1C;
+	if(scancode == 0x2A)
+	{
+		while(1)
+		{
+			__asm__ __volatile__ ("inb $0x64, %%al" : "=a"(tb));
+			if(tb & 1) break;
+		}
+		__asm__ __volatile__("inb $0x60, %%al" : "=a"(scancode));	
+		return (uint8)_vals[scancode].val - 0x20;
+	}
 
 	return (uint8)_vals[scancode].val;
 }

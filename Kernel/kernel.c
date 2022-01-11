@@ -1,6 +1,7 @@
 #include "mstdio.h"
 #include "memory.h"
 #include "heap.h"
+#include "terminal.h"
 
 typedef struct Smap
 {
@@ -37,9 +38,11 @@ __attribute__((section("kernel_entry"))) void kernel_main(void)
 	deinit_region(0x1000, (uint32)&end);
 	deinit_region(MEMADDR, max_blocks / BLOCKS_PER_BYTE);
 
-	init_heap_bitmap(normal);
+	terminal();
 
-	while(1);
+	//init_heap_bitmap(normal);
+
+	//while(1);
 }
 
 void print_mem_info()
