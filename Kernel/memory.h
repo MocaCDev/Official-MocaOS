@@ -29,10 +29,10 @@ uint8 test(int32 bit)
 }
 
 /*	Functions/Macros to manupilate overall memory usage(allocating, freeing, reserving)	*/
-uint32 kmalloc(size_t size)
+uint32 kmalloc(size_t size, size_t alloc_size)
 {
 	uint32 tmp = (uint32)&end;
-	end += size;
+	end += size * alloc_size;
 	return tmp;
 }
 int32 find_blocks(uint32 blocks)
@@ -96,7 +96,10 @@ void deinit_region(uint32 base, size_t size)
 MProcess m_alloc(uint32 blocks)
 {
 	if((max_blocks - used_blocks) < blocks)
+	{
+		Err((uint8 *)"Oversized allocation");
 		return all_processes[0];
+	}
 
 	int32 first = find_blocks(blocks);
 

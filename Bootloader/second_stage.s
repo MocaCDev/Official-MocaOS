@@ -1,4 +1,4 @@
-[org 0x7E00]
+[org 0x1000]
 use16
 
 xor ax, ax
@@ -169,7 +169,7 @@ init_pm:
 	mov ecx, 64
 	rep movsd
 
-	jmp codeseg:0x2000
+	jmp codeseg:0x1F00
     
 width:		dw 1024
 height:		dw 768

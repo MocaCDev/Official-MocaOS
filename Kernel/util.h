@@ -72,6 +72,14 @@ typedef struct MemProcess
 	size_t	allocation_used;
 } MProcess;
 
+typedef struct Smap
+{
+	uint64	base;
+	uint64	length;
+	uint32	type;
+	uint32	acpi;
+} __attribute__((packed)) _Smap;
+
 /*
  * Allow only 25 processes at once.
  * Once there is 25 processes going, you'll have to end another process to start a new one.
@@ -84,16 +92,74 @@ static Terminal_Cursor tc = {
 };
 Vesa_Info_Block *VIB = (Vesa_Info_Block*)0x4000;
 
-#define FB	VIB->framebuffer			 				// Vesa framebuffer memory address used to place pixels
-#define FONT	0x1000					 				// Custom OS font memory location
-#define WIDTH	1024					 					// Width of terminal
-#define HEIGHT	768					 					// Height of terminal
+/*	OS specific addresses.		*/
+extern uint32		end;
+#define PLACEHOLDER	(uint32)&end // Used for nothing; placeholder for address space of OS_INFO
+
+/*
+ * OS_INFO:
+ * 	If there is a OS_LOCKED "flag" placed within this address, that means there was an underlying
+ * 	problem that the OS picked up, instead of the IDT. If there is any flag set in this
+ * 	address, other than the OS_IN_ACTION "flag",
+ * 	the OS will begin to take action. Eventually, the OS_LOCKED flag will be set,
+ * 	and the OS will self-reboot(soft reboot), to hopefully fix the problem.
+ * 	The OS_IN_ACTION flag should be set at all times until problems arise.
+ *
+ * 	OS_INFO stores all information of the OS process:
+ * 		 1B  2B
+ * 		(--)(--) : Each value takes up 2 bytes. The first 2 bytes is the OS status.
+ *
+ * 		(--)(--),(--)(--),(--)(--),
+ * 		   1st      2nd     3rd
+ * 			The above sequence is the outline of the information being stored
+ * 			in OS_INFO
+ * 		1st - The OS status(OS_IN_ACTION, OVERDUE_HEAP, OS_LOCKED)
+ * 		2nd - The status of the IDT(0x0 or 0x1B01 - INTERRUPTS_ENABLED)
+ * 		3rd - Heap information. This may contain more than just a simple "flag".
+ * 		      At this point of the address, it might point to a different address where
+ * 		      we can reference all memory.
+ */
+#define OS_INFO		(uint32)PLACEHOLDER // OS_INFO placed at placeholder address
+
+/*	Static variables for last address of OS specific address spaces.	*/
+static uint32 *L_OS_INFO_ADDR  = (uint32 *)OS_INFO;
+static uint32 *L_PLACEHOLDER   = (uint32 *)PLACEHOLDER;
+
+/*	OS specific hex values. 	*/
+/*	1B specific hex values.
+ *	
+ *	1B specific hex values are for the common areas of the OS,
+ *	such as the memory, the IDT, the heap etc.
+ *	 	
+ */
+#define INTERRUPTS_ENABLED		0x1B00
+#define MEMORY_ENABLED			0x1B01
+#define HEAP_ENABLED			0x1B02
+
+/*	2B specific hex values.
+ *
+ * 	2B specific hex values are for OS specific flags which help decipher errors/problems
+ * 	within the OS. The "always on" flag, or the OS_IN_ACTION flag, should always be set.
+ * 	If the OS_IN_ACTION flag is not set, then there must be an error.
+ */
+#define OS_IN_ACTION			0x2B00
+#define OVERDUE_HEAP			0x2B01
+#define OS_LOCKED			0x2B02
+
+/*	Common constants	*/
+#define FB	VIB->framebuffer // Vesa framebuffer memory address used to place pixels
+#define FONT	0x9000		 // Custom OS font memory location
+#define WIDTH	1024		 // Width of terminal
+#define HEIGHT	768		 // Height of terminal
 #define MakeColor(R, G, B) (uint32)(R*65536 + G*256 + B	)// Equation to get RGB hex value
-#define resize(size)	size % 2						 // Get remainder value					 
+#define resize(size)	size % 2 // Get remainder value					 
 
 /*	GENERAL COLORS	*/
 #define	WHITE	MakeColor(255, 255, 255)
 #define BLACK	MakeColor(  0,   0,   0)
+#define RED	MakeColor(255,	 0,   0)
+#define GREEN	MakeColor(  0, 255,   0)
+#define BLUE	MakeColor(  0,   0, 255)
 
 /*	General functions.	*/
 void *memset(void *buf, uint8 byte, uint32 length)
@@ -119,7 +185,7 @@ void update_screen()
 {
 	uint32 *ss, *ss2;
 
-	if(tc.cursor_y >= 40)
+	if(tc.cursor_y >= 46)
 	{
 		ss = (uint32 *) FB;
 		ss2 = ss + (1024 * 16);
@@ -144,5 +210,9 @@ void clear_screen()
 	tc.cursor_x = 0;
 	tc.cursor_y = 0;
 }
+
+#define MOVE_ADDR(b) \
+	L_OS_INFO_ADDR += b; \
+	L_PLACEHOLDER  += b
 
 #endif

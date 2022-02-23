@@ -6,15 +6,16 @@
 //  Continue working on heap memory manager, perhaps add in the IDT to deal with seg faults?
 
 
-#define HEAP_BLOCK_SIZE             4096
+#define HEAP_BLOCK_SIZE             1024
+#define padding                     4
+
 // Start address of heap allocation(depending on the block size)
 static uint32 HEAP_ADDR           = 0xA000;
-#define padding                     4
 
 typedef struct HeapOutline
 {
-    uint32      block_addr;
-    uint8       occupied; // 1 yes, 0 no
+    	uint32      block_addr;
+    	uint8       occupied; // 1 yes, 0 no
 } HeapOutline_t;
 
 /*
@@ -39,23 +40,21 @@ static uint32           heap_index;
  */
 typedef struct MocaHeap
 {
-    size_t      allocation_size; // allocation size(how many blocks we want to allocate)
-    size_t      chunk_size;      // size of each block
-    uint32      *address;        // Memory address that points to available blocks within heap_bitmap.
+    	size_t      allocation_size; // allocation size(how many blocks we want to allocate)
+    	size_t      chunk_size;      // size of each block
+    	uint32      *address;        // Memory address that points to available blocks within heap_bitmap.
 } MocaHeap_t;
 
 /*
  * enum Type:
- *      Type.normal = 4096 bytes per block, allowing for 512 blocks.
- *      Type.medium = 8192 bytes per block, allowing for 1024 blocks.
- *      Type.large  = 12288 bytes per block, allowing for 1536 blocks
- *      Type.ELarge = 16384 bytes per block, allowing for 2048 blocks.
+ *      Type.normal = 1024 k-bytes per block
+ *      Type.medium = 2048 k-bytes per block
+ *      Type.large  = 4096 k-bytes per block
  */
 enum Type {
-    normal  = HEAP_BLOCK_SIZE,       // 4MB
-    medium  = HEAP_BLOCK_SIZE*2,     // 8MB
-    large   = HEAP_BLOCK_SIZE*3,     // 12MB
-    ELarge  = HEAP_BLOCK_SIZE*4,     // 16 MB
+	normal  = HEAP_BLOCK_SIZE,       // 1MB per block
+    	medium  = HEAP_BLOCK_SIZE*2,     // 2MB per block
+    	large   = HEAP_BLOCK_SIZE*3,     // 3MB per block
 };
 static enum Type        heap_allocation_size;
 
@@ -64,13 +63,13 @@ static enum Type        heap_allocation_size;
 static uint8 init_heap_bitmap(enum Type heap_allocation_type)
 {
     
-    MProcess mem = m_alloc(heap_allocation_type);
-    heap_allocation_size = heap_allocation_type;
+    	MProcess mem = m_alloc(heap_allocation_type);
+    	heap_allocation_size = heap_allocation_type;
 
-    heap_index = 0;
-    heap_bitmap = (HeapOutline_t **)mem.address;
+    	heap_index = 0;
+    	heap_bitmap = (HeapOutline_t **)mem.address;
 
-    return 0;
+    	return 0;
 }
 
 // TODO:
@@ -78,37 +77,35 @@ static uint8 init_heap_bitmap(enum Type heap_allocation_type)
 //      For now, 8192 bytes per-block seems to be plenty of heap memory.
 static MocaHeap_t allocate(uint32 size, uint32 chunk_size)
 {
-    if((size * chunk_size) > heap_allocation_size)
-    {
-        Err((uint8 *)"Invalid allocation size: Surpassed the byte-size of a block.");
-    }
+	if((size * chunk_size) > heap_allocation_size)
+	    Err((uint8 *)"Invalid allocation size: Surpassed the byte-size of a block.");
 
-    heap_bitmap[heap_index]->block_addr += (uint32)(HEAP_ADDR);// - allocation.address;
-    HEAP_ADDR += (size * chunk_size) * padding;
-    heap_bitmap[heap_index]->occupied   = 1;
-    heap_index++;
+    	heap_bitmap[heap_index]->block_addr += (uint32)(HEAP_ADDR);// - allocation.address;
+    	HEAP_ADDR += (size * chunk_size) * padding;
+    	heap_bitmap[heap_index]->occupied   = 1;
+    	heap_index++;
 
-    return (MocaHeap_t) {
-        .allocation_size = (uint32)size,
-        .chunk_size      = chunk_size,
-        .address         = (uint32*)heap_bitmap[heap_index-1]->block_addr
-    };
+    	return (MocaHeap_t) {
+        	.allocation_size = (uint32)size,
+        	.chunk_size      = chunk_size,
+        	.address         = (uint32*)heap_bitmap[heap_index-1]->block_addr
+    	};
 }
 
 static void free(MocaHeap_t allocation)
 {
-    for(uint32 i = 0; i < heap_index; i++)
-    {
-        if(heap_bitmap[i]->block_addr == *allocation.address)
-        {
-            HEAP_ADDR -= (allocation.allocation_size * allocation.chunk_size) * padding;
-            heap_bitmap[i]->occupied = 0;
+	for(uint32 i = 0; i < heap_index; i++)
+    	{
+        	if(heap_bitmap[i]->block_addr == *allocation.address)
+        	{
+            		HEAP_ADDR -= (allocation.allocation_size * allocation.chunk_size) * padding;
+            		heap_bitmap[i]->occupied = 0;
 
-            allocation.allocation_size = 0;
-            allocation.chunk_size = 0;
-            break;
-        }
-    }
+            		allocation.allocation_size = 0;
+            		allocation.chunk_size = 0;
+            		break;
+        	}
+   	}
 }
 
 #endif

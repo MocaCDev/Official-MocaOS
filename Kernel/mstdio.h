@@ -158,7 +158,7 @@ void Err(uint8 *str)
 {
 	Print(str, MakeColor(255, 0, 0), BLACK);
 
-	__asm("hlt");
+	//__asm("hlt");
 }
 
 void PrintHex(uint32 number)
@@ -182,6 +182,7 @@ void PrintHex(uint32 number)
 		i++;
 	}
 
+
 	hex[i++] = 'x';
 	hex[i++] = '0';
 	hex[i] = '\0';
@@ -194,7 +195,31 @@ void PrintHex(uint32 number)
 		hex[i] = temp;
 	}
 	Print((uint8 *)hex, WHITE, BLACK);
+}
 
+void PrintNum(uint32 _number)
+{
+	uint8 dec[80];
+	uint8 i = 0, j, temp;
+
+	while(_number > 0)
+	{
+		dec[i] = (_number % 10) + '0';
+		_number /= 10;
+		i++;
+	}
+
+	dec[i] = '\0';
+	i--;
+
+	for(j = 0; j < i; j++, i--)
+	{
+		temp = dec[j];
+		dec[j] = dec[i];
+		dec[i] = temp;
+	}
+
+	Print((uint8 *)dec, WHITE, BLACK);
 }
 
 uint8 get_key()
@@ -202,6 +227,7 @@ uint8 get_key()
 	uint8 scancode	= 0;
 	uint8 char_val 	= 0;
 	uint8 tb 	= 0;
+	uint8 *shifts   = (uint8 *)")!@#$%^&*(";
 
 	while(1)
 	{
@@ -211,17 +237,24 @@ uint8 get_key()
 
 	__asm__ __volatile__("inb $0x60, %%al" : "=a"(scancode));
 
-	
 	if(scancode == 0x1C)
 		return 0x1C;
 	if(scancode == 0x2A)
-	{
+	{	
 		while(1)
 		{
 			__asm__ __volatile__ ("inb $0x64, %%al" : "=a"(tb));
 			if(tb & 1) break;
 		}
-		__asm__ __volatile__("inb $0x60, %%al" : "=a"(scancode));	
+
+		__asm__ __volatile__("inb $0x60, %%al" : "=a"(scancode));
+
+		char_val = (uint8)_vals[scancode].val;
+
+		if(char_val >= '0' && char_val <= '9')
+			return shifts[char_val-0x30];
+			
+
 		return (uint8)_vals[scancode].val - 0x20;
 	}
 
