@@ -261,4 +261,19 @@ uint8 get_key()
 	return (uint8)_vals[scancode].val;
 }
 
+/*void get_mouse()
+{
+	outb(0xD4, 0x64);
+	outb(0xF3, 0x60);
+
+	while(!(inb(0x64) & 1)) __asm("pause");
+	uint32 ack = inb(0x60);
+	PrintHex(ack);
+	outb(0xD4, 0x64);
+	outb(100, 0x60);
+	while(!(inb(0x64) & 1)) __asm("pause");
+	ack = inb(0x60);
+	PrintHex(ack);
+}*/
+
 #endif

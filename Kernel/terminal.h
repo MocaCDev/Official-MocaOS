@@ -17,6 +17,7 @@ void print_mem_info()
 	{
 		switch(smap->type)
 		{
+
 			case 1:
 				Print((uint8 *)"(AVAILABLE) ", WHITE, BLACK);
 				break;
@@ -68,6 +69,7 @@ void print_mem_info()
 
 void terminal()
 {
+	//get_mouse();
 	Print((uint8 *)"Welcome to MocaOS!\n", WHITE, BLACK);
 	Print((uint8 *)"\tTo Get Started:\n", WHITE, BLACK);
 	Print((uint8 *)"\t\t * init heap TYPE(Where TYPE is Normal, Medium or Large) \n\t\t * init sudo user(allows super access to terminal functionality) \n\t\t * init settings(go through all terminal settings, eg. Terminal color, Terminal cursor etc) \n", BLACK, MakeColor(119, 255, 91));
@@ -103,6 +105,16 @@ void terminal()
 					goto finish;
 				}
 				idt_init();
+
+				uint32 r = 0;
+
+				__asm ("movl $17, %%eax;"
+				       "movl $0, %%ebx;"
+				       //"movl $0, %%edx;"
+				       "divl %%ebx;"
+				       : : :
+				      );
+			//	PrintHex(r);
 
 				// Set some "flags"
 				*L_OS_INFO_ADDR = INTERRUPTS_ENABLED;

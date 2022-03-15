@@ -43,7 +43,7 @@ mov es, ax
 xor bx, bx
 
 mov ah, 0x02
-mov al, 0x0F
+mov al, 0xF
 mov ch, 0x00
 mov cl, 0x0A
 mov dh, 0x00

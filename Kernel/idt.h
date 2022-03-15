@@ -47,9 +47,17 @@ void set_gate(uint8 num, void* base, uint8 flags)
  * Function wrapper for each interrupt.
  * */
 __attribute__ ((interrupt))
+void div_by_z(interrupt_frame *frame)
+{
+	Print((uint8 *)"\n\tDivide By Zero Error\n\n", WHITE, BLACK);
+	frame->ip++;
+}
+
+__attribute__ ((interrupt))
 void exception_handler_err(interrupt_frame *_interrupt, uint32 err_code)
 {
 	Print((uint8 *)"ERR CODE", WHITE, BLACK);
+	PrintHex(err_code);
 	__asm("cli; hlt");
 	//if(err_code == 0xFFFC)
 	//	__asm("int $0x3");
@@ -87,7 +95,7 @@ void interrupt_03(interrupt_frame *_interrupt)
  * */
 static uint8 inerr_index = 0;
 void *interrupts_no_err[24] = {
-	exc_handler, exc_handler, exc_handler, interrupt_03,
+	div_by_z, exc_handler, exc_handler, interrupt_03,
 	exc_handler, exc_handler, exc_handler, exc_handler,
 	exc_handler, exc_handler, exc_handler, exc_handler,
 	exc_handler, exc_handler, exc_handler, exc_handler,
@@ -110,8 +118,6 @@ void idt_init()
 	_idtr.limit = (uint16) sizeof(_idt);
 	_idtr.base = (uint32)&_idt;
 
-	//memset(&_idt, 0, sizeof(idt) * 256);
-
 	for(uint8 i = 0; i < 32; i++)
 	{
 		if(i == 8 || i == 10 || i == 11 || i == 12 ||
@@ -132,7 +138,7 @@ void idt_init()
 		set_gate(i, int_handler, gate_interrupt);
 	}
 
-	__asm__ __volatile__("lidt %0" : : "memory"(_idtr));
+	__asm__ __volatile__("lidt %0" : : "m"(_idtr));
 	//__asm__ __volatile__("sti");
 }
 

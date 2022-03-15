@@ -3,7 +3,7 @@
 #include "util.h"
 
 #define BLOCKS_PER_BYTE		8
-#define BLOCK_SIZE		4096
+#define BLOCK_SIZE		1024
 #define BLOCK_ALIGN		BLOCK_SIZE
 
 extern uint32 end;
@@ -95,32 +95,34 @@ void deinit_region(uint32 base, size_t size)
 
 MProcess m_alloc(uint32 blocks)
 {
+	/* Check if we still have enough blocks for allocation. */
 	if((max_blocks - used_blocks) < blocks)
 	{
 		Err((uint8 *)"Oversized allocation");
 		return all_processes[0];
 	}
 
+	/* Get the available blocks; if fails, return a empty process. */
 	int32 first = find_blocks(blocks);
-
 	if(first == -1)
 		return all_processes[0];
 
+	/* If we obtain the blocks, set the to a status of "used". */
 	for(int32 i = 0; i < blocks; i++)
 		set(first+1);
 
-
+	/* Get the address. If we already have a proccess(or more) going, check the allocation size of the last process, and add onto addr. */
 	uint32 addr = 0;
-
 	if(curr_pID > 0)
 		addr += all_processes[curr_pID-1].allocation_size;
 
+	/* Apply the first block and block size and add to the overall address. Then add the amount of used blocks/amount of allocated blocks. */
 	addr += first * BLOCK_SIZE;
-
 	used_blocks+=blocks;
 
 	total_allocated += blocks;
 
+	/* Setup the process information, increase curr_pID, return.*/
 	all_processes[curr_pID].occupied	= 0;
 	all_processes[curr_pID].pID		= curr_pID;
 	all_processes[curr_pID].address		= addr;
@@ -133,26 +135,28 @@ MProcess m_alloc(uint32 blocks)
 
 void m_free(MProcess *process)
 {
+	/* Get frame, and unset memory regions. Subtract allocation size from used blocks. */
 	int32 frame = process->address / BLOCK_SIZE;
-
 	for(uint32 i = 0; i < process->allocation_size; i++)
 	{
 		unset(frame+i);
 	}
 	used_blocks -= process->allocation_size;
 	
-	// Make sure to clear out all buffer in the memory address
+	/* Make sure to clear out all buffer in the memory address. */
 	uint32 *addr = (uint32 *)process->address;
 	for(uint32 i = 0; i < process->allocation_size; i++)
 		*addr++ = '\0';
 	
+	/* Clear out process information to default. */
 	total_allocated -= process->allocation_size;
 	process->occupied	= 1;
 	process->pID		= 0;
 	process->address	= 0;
 	process->allocation_size= 0;
 	process->allocation_used= 0;
-
+	
+	/* Update process all together. Subtract the total amount of processes. */
 	all_processes[process->pID] = *process;
 	curr_pID--;
 }
@@ -160,14 +164,20 @@ void m_free(MProcess *process)
 /*	Functions/Macros to assign/use memory allocations.	*/
 void assign_value(MProcess *process, uint8 value)
 {
-	// Check if the allocation size has be occupied
+	/* Check if the allocation size has be occupied */
 	if(process->allocation_used == process->allocation_size)
 		return;
 
+	/* If we dont return, we still have room. Lets check the amount of room we have. */
+	if(process->allocation_used + 1 >= process->allocation_size)
+		return;
+
+	/* No? Okay, lets assign the byte value to the next open address. */
 	uint32 *addr = (uint32 *)process->address;
 	addr[process->allocation_used] = value;
 	process->allocation_used++;
 
+	/* Update processes. */
 	all_processes[process->pID] = *process;
 }
 
