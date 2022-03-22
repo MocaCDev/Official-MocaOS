@@ -28,8 +28,8 @@ typedef struct
 	uint32	ss;
 } __attribute__((packed)) interrupt_frame;
 
-static idt _idt[256];
-//extern idt	_idt[256];
+//static idt _idt[256];
+extern idt	_idt[256];
 //extern uint32  isr1;
 static idtr	_idtr;
 
@@ -51,6 +51,16 @@ void div_by_z(interrupt_frame *frame)
 {
 	Print((uint8 *)"\n\tDivide By Zero Error\n\n", WHITE, BLACK);
 	frame->ip++;
+}
+
+__attribute__ ((interrupt))
+void page_fault(interrupt_frame *frame, uint32 err_code)
+{
+	Print((uint8 *)"Page Fault", WHITE, BLACK);
+	uint32 fault_addr;
+	__asm volatile("movl %%cr2, %0":"=r"(fault_addr));
+
+	__asm("cli; hlt");
 }
 
 __attribute__ ((interrupt))
@@ -108,7 +118,7 @@ void *interrupts_with_err[8] = {
 	exception_handler_err, exception_handler_err, 
 	exception_handler_err, exception_handler_err,
 	exception_handler_err, exception_handler_err, 
-	exception_handler_err, exception_handler_err
+	page_fault, exception_handler_err
 };
 
 void idt_init()

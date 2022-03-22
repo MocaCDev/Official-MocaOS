@@ -87,9 +87,10 @@ typedef struct Smap
 static MProcess all_processes[25];
 
 static Terminal_Cursor tc = {
-	.cursor_x = 0, 
+	.cursor_x = 0,
 	.cursor_y = 0
 };
+
 Vesa_Info_Block *VIB = (Vesa_Info_Block*)0x4000;
 
 /*	OS specific addresses.		*/
@@ -162,6 +163,9 @@ static uint32 *L_PLACEHOLDER   = (uint32 *)PLACEHOLDER;
 #define BLUE	MakeColor(  0,   0, 255)
 
 /*	General functions.	*/
+
+#define abs(number) ((number < 0) ? (-number) : (number))
+
 void *memset(void *buf, uint8 byte, uint32 length)
 {
 	uint8 *val = (uint8 *)buf;

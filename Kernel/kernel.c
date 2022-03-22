@@ -2,11 +2,20 @@
 #include "memory.h"
 #include "terminal.h"
 #include "idt.h"
+#include "gui.h"
+#include "virtual_mem.h"
 
 #define MEMADDR	0x15000
 
+extern void loadPageDir(uint32 *);
+extern void enablePaging();
+
 __attribute__((section("kernel_entry"))) void kernel_main(void)
 {
+	//uint32 i = 0;
+	//while(i <= 50)
+	//	put_pixel(1, i, GREEN);	
+	
 
 	_Smap *smap = (_Smap *)0x8504;
 	uint32 entries = *(uint32 *)0x8500;
@@ -43,5 +52,7 @@ __attribute__((section("kernel_entry"))) void kernel_main(void)
 	*L_OS_INFO_ADDR = OS_IN_ACTION;
 	MOVE_ADDR(2);
 
+
+		
 	terminal();
 }

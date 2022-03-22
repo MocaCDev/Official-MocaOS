@@ -161,6 +161,10 @@ void Err(uint8 *str)
 	//__asm("hlt");
 }
 
+#define PANIC(msg) \
+	Err((uint8 *)msg); \
+	__asm("hlt;");
+
 void PrintHex(uint32 number)
 {
 

@@ -4,9 +4,9 @@ SECTIONS {
 		*(kernel_entry);
 		*(.text*);
 	}
-	.idt BLOCK(.) : ALIGN(.)
+	.idt BLOCK(.) : ALIGN(0x1000)
 	{
-		_idt = .;
+		_idt = 0x1000;
 		. = . * 0x100;
 	}
 	.rodata :

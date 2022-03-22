@@ -7,6 +7,8 @@
 #define BLOCK_ALIGN		BLOCK_SIZE
 
 extern uint32 end;
+
+static uint32 addr		= 0xA0000000;
 static uint32 used_blocks	= 0;
 static uint32 max_blocks	= 0;
 static uint32 *memory_map	= 0;
@@ -28,13 +30,41 @@ uint8 test(int32 bit)
 	return memory_map[bit / 32] & (1 << (bit % 32));
 }
 
-/*	Functions/Macros to manupilate overall memory usage(allocating, freeing, reserving)	*/
-uint32 kmalloc(size_t size, size_t alloc_size)
+/*	Function's/Macros to manupilate overall memory usage(allocating, freeing, reserving)	*/
+uint32 kmalloc(size_t size)
 {
-	uint32 tmp = (uint32)&end;
-	end += size * alloc_size;
+	uint32 tmp = addr;
+	addr += size;
 	return tmp;
 }
+uint32 kmalloc_p(size_t size, int8 align)
+{
+	if(align == 1 && (addr & 0xFFFFF000))
+	{
+		addr &= 0xFFFFF000;
+		addr += 0x1000;
+	}
+	uint32 tmp = addr;
+	end += size * size;
+	return tmp;
+}
+uint32 kmalloc_ap(size_t size, int8 align, uint32 *phys)
+{
+	if(align == 1 && (addr & 0xFFFFF000))
+	{
+		addr &= 0xFFFFF000;
+		addr += 0x1000;
+	}
+	if(phys)
+	{
+		*phys = addr;
+	}
+
+	uint32 tmp = addr;
+	addr += size;
+	return tmp;
+}
+
 int32 find_blocks(uint32 blocks)
 {
 	if(blocks == 0) return -1;
