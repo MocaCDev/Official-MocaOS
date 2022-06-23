@@ -1,8 +1,8 @@
 #include "mstdio.h"
 #include "memory.h"
 #include "terminal.h"
+#include "mouse.h"
 #include "idt.h"
-#include "gui.h"
 #include "virtual_mem.h"
 
 #define MEMADDR	0x15000
@@ -12,10 +12,39 @@ extern void enablePaging();
 
 __attribute__((section("kernel_entry"))) void kernel_main(void)
 {
+	*L_OS_INFO_ADDR = INITIAL_STATE;
+	//L_OS_INFO_ADDR += 2;
+	pic_remap(0x20, 0x28);
+	idt_init();
+	pic_set_mask(2, 0);
+	init_pit();
+	pic_set_mask(0, 0);
+	init_mouse();
+	pic_set_mask(12, 0);
+	
 	//uint32 i = 0;
 	//while(i <= 50)
 	//	put_pixel(1, i, GREEN);	
-	
+	//remap_pic(0x20, 0x28);
+    //idt_init();
+
+	//__asm__ __volatile__("movl $0x1D, %edx\nmovl $0, %eax\nint $0x80");
+
+	/*__asm__ __volatile__(
+		"movl $0, %eax\n"
+		"movl $0, %ebx\n"
+		"xor %edx, %edx\n"
+		"div %ebx"
+	);*/
+
+    // enable cascade
+    //pic_set_mask(2, 0);
+
+    //init_pit();
+    //pic_set_mask(0, 0);
+
+    //init_mouse();
+    //pic_set_mask(12, 0);
 
 	_Smap *smap = (_Smap *)0x8504;
 	uint32 entries = *(uint32 *)0x8500;
@@ -49,10 +78,24 @@ __attribute__((section("kernel_entry"))) void kernel_main(void)
 	deinit_region(0x1F00, (uint32)&end);
 
 	/* MocaOS is now in full action. */
-	*L_OS_INFO_ADDR = OS_IN_ACTION;
+	//*L_OS_INFO_ADDR = OS_IN_ACTION;
 	MOVE_ADDR(2);
 
+	//idt_init();
+	//init_pit();
 
-		
+	//init_mouse();
+	//init_windows();
+
+	//window_create(
+	//	"test", 30, 30,
+	//	800, 400
+	//);
+	//refresh();
+
+	//while(1);
+
+	__asm__ __volatile__("sti");
+	//while(1);
 	terminal();
 }

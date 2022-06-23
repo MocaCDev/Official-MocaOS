@@ -97,28 +97,50 @@ void terminal()
 		{
 			if(strcmp((uint8 *)string, (uint8 *)"mem")==0)
 				print_mem_info();
+			else if(strcmp((uint8 *)string, (uint8 *)"status")==0)
+			{
+				//PrintHex((uint32) *((uint32 *)OS_INFO));
+				uint32 *temp = (uint32 *)OS_INFO;
+				for(;;) {
+					if(*((uint32 *)temp) == EMPTY)
+						goto end;
+					switch(*((uint32 *)temp)) {
+						case INITIAL_STATE: Print((uint8 *)"\n\n\tInitial State", WHITE, BLACK); break;
+						case INTERRUPTS_ENABLED: Print((uint8 *)"\n\n\tEnterrupts Enabled.", WHITE, BLACK); break;
+						default: goto end;
+					}
+
+					temp += 2;
+				}
+
+				end:
+				temp--;
+			}
 			else if(strcmp((uint8 *)string, (uint8 *)"init")==0)
 			{
-				if(*((uint32 *)OS_INFO+2) == INTERRUPTS_ENABLED)
+				if(*((uint32 *)OS_INFO) == INTERRUPTS_ENABLED)
 				{
 					Print((uint8 *)"\n\tInterrupts already enabled\n\n", WHITE, BLACK);
 					goto finish;
 				}
-				idt_init();
+				//idt_init();
 
 				uint32 r = 0;
 
-				__asm ("movl $17, %%eax;"
+				/*__asm ("movl $17, %%eax;"
 				       "movl $0, %%ebx;"
 				       //"movl $0, %%edx;"
 				       "divl %%ebx;"
 				       : : :
-				      );
+				      );*/
 			//	PrintHex(r);
 
 				// Set some "flags"
+				L_OS_INFO_ADDR -= 2;
 				*L_OS_INFO_ADDR = INTERRUPTS_ENABLED;
 				L_OS_INFO_ADDR  += 2;
+				*L_OS_INFO_ADDR = EMPTY;
+				//L_OS_INFO_ADDR += 2;
 			}
 			else if(strcmp((uint8 *)string, (uint8 *)"reboot")==0)
 			{

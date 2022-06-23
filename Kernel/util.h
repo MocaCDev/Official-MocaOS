@@ -7,9 +7,8 @@ typedef unsigned short		uint16;
 typedef short			int16;
 typedef unsigned int		uint32;
 typedef int			int32;
-typedef unsigned long long	uint64;
+typedef unsigned long long	uint64, size_t;
 typedef long long		int64;
-typedef uint64			size_t;
 
 /*	INFO STRUCTS	*/
 // VesaInfoBlock:
@@ -92,6 +91,8 @@ static Terminal_Cursor tc = {
 };
 
 Vesa_Info_Block *VIB = (Vesa_Info_Block*)0x4000;
+static uint32 ticks = 0x0;
+#define FREQUENCY		1000
 
 /*	OS specific addresses.		*/
 extern uint32		end;
@@ -133,6 +134,8 @@ static uint32 *L_PLACEHOLDER   = (uint32 *)PLACEHOLDER;
  *	such as the memory, the IDT, the heap etc.
  *	 	
  */
+#define EMPTY					0x00A1
+#define INITIAL_STATE			0x1A00
 #define INTERRUPTS_ENABLED		0x1B00
 #define MEMORY_ENABLED			0x1B01
 #define HEAP_ENABLED			0x1B02
@@ -148,7 +151,10 @@ static uint32 *L_PLACEHOLDER   = (uint32 *)PLACEHOLDER;
 #define OS_LOCKED			0x2B02
 
 /*	Common constants	*/
-#define FB	VIB->framebuffer // Vesa framebuffer memory address used to place pixels
+#define FB		VIB->framebuffer // Vesa framebuffer memory address used to place pixels
+#define pitch	VIB->pitch
+#define width	VIB->width
+#define height	VIB->height
 #define FONT	0x9000		 // Custom OS font memory location
 #define WIDTH	1024		 // Width of terminal
 #define HEIGHT	768		 // Height of terminal
@@ -174,15 +180,31 @@ void *memset(void *buf, uint8 byte, uint32 length)
 	return buf;
 }
 
-uint8 inb(uint16 port)
+uint8 PORT_IN(uint16 port)
 {
 	uint8 rv;
-	__asm__ __volatile__ ("inb %1, %0" : "=a"(rv) : "dN"(port));
+	__asm__ __volatile__ ("in %1, %0" : "=a"(rv) : "dN"(port));
 	return rv;
 }
-void outb(uint16 port, uint8 data)
+void PORT_OUT(uint16 port, uint8 data)
 {
 	__asm__ __volatile__ ("outb %1, %0" : : "dN"(port), "a"(data));
+}
+
+unsigned read_pit_count(void) {
+	unsigned count = 0;
+ 
+	// Disable interrupts
+	//cli();
+	__asm__ __volatile__ ("cli;");
+ 
+	// al = channel in bits 6 and 7, remaining bits clear
+	PORT_OUT(0x43,0b0000000);
+ 
+	count = PORT_IN(0x40);		// Low byte
+	count |= PORT_IN(0x40)<<8;		// High byte
+ 
+	return count;
 }
 
 void update_screen()
