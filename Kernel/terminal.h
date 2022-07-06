@@ -54,16 +54,16 @@ void print_mem_info()
 	Print((uint8 *)"Total: ", WHITE, BLACK);
 	PrintHex(smap->base + smap->length - 1);
 	Print((uint8 *)", 4kb blocks: ", WHITE, BLACK);
-	PrintHex((uint32)max_blocks);
+	PrintHex((uint32)moca_pmm.max_blocks);
 	Print((uint8 *)", Used: ", WHITE, BLACK);
-	PrintHex((uint32)used_blocks);
+	PrintHex((uint32)moca_pmm.used_blocks);
 	Print((uint8 *)", Available: ", WHITE, BLACK);
-	PrintHex(max_blocks-used_blocks);
+	PrintHex(moca_pmm.max_blocks-moca_pmm.used_blocks);
 	Print((uint8 *)"(", WHITE, BLACK);
-	PrintNum((max_blocks-used_blocks)/1024);
+	PrintNum((moca_pmm.max_blocks-moca_pmm.used_blocks)/1024);
 	Print((uint8 *)"MB)", WHITE, BLACK);
 	Print((uint8 *)", Allocated: ", WHITE, BLACK);
-	PrintHex(total_allocated);
+	//PrintHex(total_allocated);
 	Print((uint8 *)"\n", BLACK, BLACK);
 }
 
@@ -85,7 +85,12 @@ void terminal()
 	{
 		input = get_key();
 
-		if(input && !(input == 0x1C))
+		if(input == 0x48)
+		{
+			Print((uint8 *)"Up", RED, BLACK);
+			__asm("cli;hlt");
+		}
+		if(!(input == 0x1C) && (input >= 'a' && input <= 'z'))
 		{
 			PutC((uint8)input, WHITE, BLACK);
 			string[length] = input;

@@ -198,7 +198,7 @@ void mouse_handler(interrupt_frame *_interrupt)
     switch(HANDLER_CYCLE) {
         case 0: {
             current_packet.flags = PORT_IN(0x60);
-            PrintHex((uint32) current_packet.flags);
+            //PrintHex((uint32) current_packet.flags);
             if(current_packet.flags & (1 << 6) || current_packet.flags & (1 << 7))
                 discard = 1;
             if(!(current_packet.flags & (1 << 3)))
@@ -339,6 +339,7 @@ void idt_init()
 		set_gate(i, int_handler, gate_interrupt);
 	}
 
+    //set_gate(0x1, keyboard, 0x8E);
 	set_gate(0x20, pit_handler, 0x8E);
     set_gate(0x20+12, mouse_handler, 0x8E);
 

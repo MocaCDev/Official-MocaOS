@@ -3,9 +3,9 @@
 #include "terminal.h"
 #include "mouse.h"
 #include "idt.h"
-#include "virtual_mem.h"
+//#include "virtual_mem.h"
 
-#define MEMADDR	0x15000
+#define MEMADDR	0xFFF80000
 
 extern void loadPageDir(uint32 *);
 extern void enablePaging();
@@ -21,7 +21,6 @@ __attribute__((section("kernel_entry"))) void kernel_main(void)
 	pic_set_mask(0, 0);
 	init_mouse();
 	pic_set_mask(12, 0);
-	
 	//uint32 i = 0;
 	//while(i <= 50)
 	//	put_pixel(1, i, GREEN);	
@@ -45,6 +44,7 @@ __attribute__((section("kernel_entry"))) void kernel_main(void)
 
     //init_mouse();
     //pic_set_mask(12, 0);
+	PrintHex((uint32) MEMADDR);
 
 	_Smap *smap = (_Smap *)0x8504;
 	uint32 entries = *(uint32 *)0x8500;
@@ -60,9 +60,9 @@ __attribute__((section("kernel_entry"))) void kernel_main(void)
 		}
 		smap++;
 	}
-
 	/* Initialize physical memory(should be 127MB of available memory, with 1024 byte block sizes). */
-	init_mem(MEMADDR, total);
+	init_pmm(MEMADDR, total);
+	//Print((uint8 *)"Hey", WHITE, BLACK);
 
 	/* Inititalize each region(even the region of the kernel) to map out all available memory location. Deinit kernel locations afterwards. */
 	smap = (_Smap *)0x8504;
@@ -79,7 +79,7 @@ __attribute__((section("kernel_entry"))) void kernel_main(void)
 
 	/* MocaOS is now in full action. */
 	//*L_OS_INFO_ADDR = OS_IN_ACTION;
-	MOVE_ADDR(2);
+	//MOVE_ADDR(2);
 
 	//idt_init();
 	//init_pit();

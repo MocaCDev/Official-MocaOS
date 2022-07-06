@@ -226,21 +226,23 @@ void PrintNum(uint32 _number)
 	Print((uint8 *)dec, WHITE, BLACK);
 }
 
-uint8 get_key()
+uint8 get_key() 
 {
 	uint8 scancode	= 0;
 	uint8 char_val 	= 0;
-	uint8 tb 	= 0;
+	uint8 tb 		= 0;
 	uint8 *shifts   = (uint8 *)")!@#$%^&*(";
 
 	while(1)
-	{
-		__asm__ __volatile__ ("inb $0x64, %%al" : "=a"(tb));
-		if(tb & 1) break;
-	}
+		{
+			__asm__ __volatile__ ("inb $0x64, %%al" : "=a"(tb));
+			if(tb & 1) break;
+		}
 
 	__asm__ __volatile__("inb $0x60, %%al" : "=a"(scancode));
 
+	if(scancode == 0x48)
+		return 0x48;
 	if(scancode == 0x1C)
 		return 0x1C;
 	if(scancode == 0x2A)
