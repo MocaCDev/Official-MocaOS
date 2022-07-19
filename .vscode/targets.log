@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Jun 23 03:57:44 2022
+# Make data base, printed on Mon Jul 18 21:07:31 2022
 
 # Variables
 
@@ -18,8 +18,6 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 WSLENV = ELECTRON_RUN_AS_NODE/w:
 # default
 .SHELLFLAGS := -c
-# environment
-VSCODE_LOG_NATIVE = false
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # automatic
@@ -34,6 +32,8 @@ SHELL = /bin/sh
 VSCODE_NLS_CONFIG = {"locale":"en","availableLanguages":{}}
 # environment
 _ = /mnt/c/Users/white/AppData/Local/Programs/Microsoft VS Code/bin/code
+# environment
+GITHUB_TOKEN = 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
 # makefile (from 'Makefile', line 1)
 MAKEFILE_LIST :=  Makefile
 # 'override' directive
@@ -41,21 +41,19 @@ GNUMAKEFLAGS :=
 # environment
 XDG_DATA_DIRS = /usr/local/share:/usr/share:/var/lib/snapd/desktop
 # environment
-VSCODE_VERBOSE_LOGGING = true
-# environment
 LESSOPEN = | /usr/bin/lesspipe %s
 # environment
 VSCODE_CWD = /mnt/c/Users/white/AppData/Local/Programs/Microsoft VS Code
 # default
 MAKE_HOST := x86_64-pc-linux-gnu
 # environment
-PATH = /home/moca/.vscode-server/bin/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5/bin/remote-cli:/home/moca/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Users/white/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/white/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Program Files (x86)/qemu/:/mnt/c/ProgramData/Microsoft/Windows/Start Menu/Programs/XLaunch:/mnt/c/Users/white/Downloads/python-3.10.4-amd64.exe:/mnt/c/MinGW/bin:/snap/bin
+PATH = /home/moca/.vscode-server/bin/b06ae3b2d2dbfe28bca3134cc6be65935cdfea6a/bin/remote-cli:/home/moca/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Users/white/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/white/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Program Files (x86)/qemu/:/mnt/c/ProgramData/Microsoft/Windows/Start Menu/Programs/XLaunch:/mnt/c/Users/white/Downloads/python-3.10.4-amd64.exe:/mnt/c/MinGW/bin:/snap/bin
 # environment
 NAME = Code
 # environment
-VSCODE_LOG_STACK = false
+ELECTRON_RUN_AS_NODE = 1
 # environment
-VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-4bce8dec-4ec9-42d8-b0ec-44abd29612a2.sock
+VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-23eaeaf2-511c-4d47-b404-2e4521aff1a7.sock
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # environment
@@ -63,9 +61,7 @@ LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:
 # automatic
 %F = $(notdir $%)
 # environment
-DISPLAY = 0
-# environment
-VSCODE_PIPE_LOGGING = true
+DISPLAY = 0:0
 # environment
 PWD = /home/moca/Official-MocaOS
 # default
@@ -79,7 +75,7 @@ LESSCLOSE = /usr/bin/lesspipe %s %s
 # environment
 LOGNAME = moca
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # automatic
@@ -147,15 +143,13 @@ LANG = C
 # environment
 TERM = xterm-256color
 # environment
-VSCODE_EXTHOST_WILL_SEND_SOCKET = true
-# environment
 WSL_DISTRO_NAME = Ubuntu
 # environment
 MOTD_SHOWN = update-motd
 # makefile (from 'Makefile', line 2)
 FILES = boot second_stage
 # variable set hash-table stats:
-# Load=72/1024=7%, Rehash=0, Collisions=5/100=5%
+# Load=69/1024=7%, Rehash=0, Collisions=5/97=5%
 
 # Pattern-specific Variable Values
 
@@ -163,9 +157,9 @@ FILES = boot second_stage
 
 # Directories
 
-# . (device 2, inode 2814749767298265): 14 files, no impossibilities.
+# . (device 2, inode 2814749767298265): 22 files, no impossibilities.
 
-# 14 files, no impossibilities in 1 directories.
+# 22 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -188,7 +182,7 @@ all:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-23 03:57:08.9337994
+#  Last modified 2022-07-15 04:21:08.7396873
 #  File has been updated.
 #  Successfully updated.
 
@@ -206,8 +200,8 @@ build: boot second_stage compile
 #  File does not exist.
 #  File has not been updated.
 #  recipe to execute (from 'Makefile', line 14):
-	dd if=/dev/zero of=OS.bin bs=512 count=35
-	cat $(BIN_FILES) test_font.bin bin/kernel.bin > temp.bin
+	dd if=/dev/zero of=OS.bin bs=512 count=32
+	cat $(BIN_FILES) test_font.bin tester.bin bin/kernel.bin > temp.bin
 	dd if=temp.bin of=OS.bin conv=notrunc
 	rm -rf temp.bin
 
@@ -218,7 +212,7 @@ compile:
 #  File has not been updated.
 #  recipe to execute (from 'Makefile', line 23):
 	clang -std=gnu99  -masm=intel -mno-mmx -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel -m32 -march=i386 -fno-pic -MMD -mno-80387 -fno-stack-protector -ffreestanding -fno-builtin -nostdinc -O1 -c Kernel/kernel.c -o bin/kernel.o
-	ld -m elf_i386 -TKernel/kernel.ld paging.bin bin/kernel.o --oformat binary -o bin/kernel.bin
+	ld -m elf_i386 -TKernel/kernel.ld bin/kernel.o --oformat binary -o bin/kernel.bin
 	rm -rf paging.o
 
 # Not a target:
@@ -260,13 +254,13 @@ boot:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 26 / storage = 213 B / avg = 8 B
-# current buf: size = 8162 B / used = 213 B / count = 26 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 34 / storage = 279 B / avg = 8 B
+# current buf: size = 8162 B / used = 279 B / count = 34 / avg = 8 B
 
-# strcache performance: lookups = 54 / hit rate = 51%
+# strcache performance: lookups = 62 / hit rate = 45%
 # hash-table stats:
-# Load=26/8192=0%, Rehash=0, Collisions=1/54=2%
-# Finished Make data base on Thu Jun 23 03:57:44 2022
+# Load=34/8192=0%, Rehash=0, Collisions=1/62=2%
+# Finished Make data base on Mon Jul 18 21:07:31 2022
 
  
 make: *** No rule to make target 'all'.  Stop.

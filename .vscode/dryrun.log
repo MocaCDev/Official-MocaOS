@@ -1,14 +1,14 @@
-make --dry-run --keep-going --print-directory
+make --dry-run --always-make --keep-going --print-directory
 make: Entering directory '/home/moca/Official-MocaOS'
 nasm -f bin -o bin/boot.bin Bootloader/boot.s
 nasm -f bin -o test_font.bin test_font.s
 nasm -f bin -o bin/second_stage.bin Bootloader/second_stage.s
 nasm -f bin -o test_font.bin test_font.s
 clang -std=gnu99  -masm=intel -mno-mmx -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel -m32 -march=i386 -fno-pic -MMD -mno-80387 -fno-stack-protector -ffreestanding -fno-builtin -nostdinc -O1 -c Kernel/kernel.c -o bin/kernel.o
-ld -m elf_i386 -TKernel/kernel.ld paging.bin bin/kernel.o --oformat binary -o bin/kernel.bin
+ld -m elf_i386 -TKernel/kernel.ld bin/kernel.o --oformat binary -o bin/kernel.bin
 rm -rf paging.o
-dd if=/dev/zero of=OS.bin bs=512 count=35
-cat bin/boot.bin bin/second_stage.bin test_font.bin bin/kernel.bin > temp.bin
+dd if=/dev/zero of=OS.bin bs=512 count=32
+cat bin/boot.bin bin/second_stage.bin test_font.bin tester.bin bin/kernel.bin > temp.bin
 dd if=temp.bin of=OS.bin conv=notrunc
 rm -rf temp.bin
 qemu-system-i386 -drive format=raw,file=OS.bin,if=ide,index=0,media=disk

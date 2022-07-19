@@ -6,12 +6,98 @@
 //#include "virtual_mem.h"
 
 #define MEMADDR	0xFFF80000
+#define BMP_HDR_ADDR 0xD000
+#define BMP_PXL_ADDR (BMP_HDR_ADDR + 18)
 
 extern void loadPageDir(uint32 *);
 extern void enablePaging();
 
+typedef struct HeaderInfo {
+	uint8	id[6]; 				// "MOCAF"
+	uint32	amnt_per_scanline;	// Amnt of pixels per row
+	uint32	length;				// Amnt of rows
+	uint32	total;				// Total bytes from image
+} __attribute__((packed)) Header_Info;
+
 __attribute__((section("kernel_entry"))) void kernel_main(void)
 {
+	uint8 *addr = (uint8 *)BMP_HDR_ADDR;
+	uint32 *fb = (uint32 *)FB;
+
+	tc.cursor_x = 25;
+	tc.cursor_y = 25;
+
+	addr += 6;
+	PrintHex((uint32) *addr);
+
+	addr += 4;
+
+	PrintHex((uint32) *addr);
+
+	addr+=4;
+	PrintHex((uint32) *addr);
+
+	__asm__ ("cli; hlt");
+
+	Header_Info *i = (Header_Info *) addr;
+	//Print((uint8 *) i->a1, WHITE, BLACK);
+	//PrintHex((uint32) i->a2);
+
+	Print((uint8 *) i->id, WHITE, BLACK);
+	Print((uint8 *)"\n", BLACK, BLACK);
+	PrintHex((uint32) i->amnt_per_scanline);
+	Print((uint8 *)"\n", BLACK, BLACK);
+	PrintHex((uint32) i->length);
+	Print((uint8 *)"\n", BLACK, BLACK);
+	PrintHex((uint32) i->total);
+	Print((uint8 *)"\n", BLACK, BLACK);
+	PrintHex((uint32) *(uint32 *)BMP_PXL_ADDR);
+
+	__asm__ ("cli; hlt");
+
+
+	//addr++;
+	
+	uint8 amnt_per_scanline = (uint8 )*addr;
+	uint8 current_amnt = 0;
+	addr++;
+	uint8 current_width = (uint8)*addr++;
+	/*Print((uint8 *)"Amnt Per Scanline: ", WHITE, BLACK);
+	PrintHex((uint32) amnt_per_scanline);
+	Print((uint8 *)"\n", BLACK, BLACK);
+	Print((uint8 *)"Current Width: ", WHITE, BLACK);
+	PrintHex((uint32) current_width);*/
+
+	tc.cursor_x = 5;
+	tc.cursor_y = 10;
+	//PrintHex((uint32) RED);
+
+	fb += (tc.cursor_x * 8) + (tc.cursor_y * 16 * WIDTH);
+	for(uint8 i = 0; ; i++)
+	{
+		if(*(uint32 *)addr == 257)
+		{
+			addr++;
+			if(*(uint8 *)addr == 'E') break;
+			current_width = (uint8) *addr;
+			//Print((uint8 *)"Current Width: ", WHITE, BLACK);
+			//PrintHex((uint32) current_width);
+			addr++;
+		}
+		for(int8 b = current_width; b >= 0; b--)
+		{
+			*fb = *addr;
+			fb++;
+		}
+		addr++;
+		if(!(*(uint32 *)addr == 257))
+		{
+			fb+=(WIDTH - (current_amnt+1));
+			current_amnt++;
+		} else
+			current_amnt = 0;
+	}
+	__asm__ ("cli; hlt");
 	*L_OS_INFO_ADDR = INITIAL_STATE;
 	//L_OS_INFO_ADDR += 2;
 	pic_remap(0x20, 0x28);

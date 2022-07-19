@@ -169,7 +169,7 @@ init_pm:
 	mov ecx, 64
 	rep movsd
 
-	jmp codeseg:0x1F00
+	jmp codeseg:0xF000
     
 width:		dw 1024
 height:		dw 768

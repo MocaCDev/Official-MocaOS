@@ -39,7 +39,6 @@ void unset_entry(uint32 bit)
 void init_pmm(uint32 start_addr, uint32 total_entries)
 {
 	moca_pmm.PMM_start = start_addr;
-	PrintHex((uint32) moca_pmm.PMM_start);
 	moca_pmm.bitmap = (uint32 *) start_addr;
 	moca_pmm.max_blocks = total_entries / BLOCK_SIZE;
 	moca_pmm.used_blocks = moca_pmm.max_blocks;
